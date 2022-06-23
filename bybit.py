@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import logging
 from typing import Optional, Tuple
 import asyncio
+from syncer import sync
 
 from telegram import __version__ as TG_VER
 
@@ -162,12 +163,13 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
 
 
-def handle_orders(message):
+@sync
+async def handle_orders(message):
     logger.info("Order Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
     for chat_id in chat_ids:
-        loop.run_until_complete(tg_app.bot.send_message(
-            chat_id=chat_id, text=json.dumps(message)))
+        await tg_app.bot.send_message(
+            chat_id=chat_id, text=json.dumps(message))
 
 
 async def send_test(update, context):
@@ -196,7 +198,6 @@ async def enroll_this(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def main() -> None:
     """Start the bot."""
-    loop = asyncio.get_event_loop()
     # Keep track of which chats the bot is in
     tg_app.add_handler(ChatMemberHandler(
         track_chats, ChatMemberHandler.MY_CHAT_MEMBER))
