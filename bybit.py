@@ -54,6 +54,12 @@ ws_usdt_perpetual = usdt_perpetual.WebSocket(
     api_secret=BYBIT_API_SECRET
 )
 
+ws_spot = spot.WebSocket(
+    test=False,
+    api_key=BYBIT_API_KEY,
+    api_secret=BYBIT_API_SECRET
+)
+
 my_persistence = PicklePersistence(filepath='my_file')
 # Create the Application and pass it your bot's token.
 tg_app = Application.builder().token(
@@ -165,6 +171,18 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 @sync
+async def handle_execution(message):
+    """
+    docstring
+    """
+    logger.info("Order Received!")
+    chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
+    for chat_id in chat_ids:
+        await tg_app.bot.send_message(
+            chat_id=chat_id, text=json.dumps(message))
+
+
+@sync
 async def handle_orders(message):
     logger.info("Order Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
@@ -213,6 +231,7 @@ def main() -> None:
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
     ws_usdt_perpetual.order_stream(handle_orders)
+    ws_spot.execution_report_stream(handle_execution)
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
