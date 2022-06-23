@@ -2,7 +2,7 @@ import json
 import os
 from queue import PriorityQueue
 import time
-from pybit import inverse_perpetual
+from pybit import inverse_perpetual, spot, usdt_perpetual
 from dotenv import load_dotenv
 import logging
 from typing import Optional, Tuple
@@ -48,11 +48,12 @@ session_auth = inverse_perpetual.HTTP(
     api_secret=BYBIT_API_SECRET
 )
 
-ws = inverse_perpetual.WebSocket(
+ws_usdt_perpetual = usdt_perpetual.WebSocket(
     test=False,
     api_key=BYBIT_API_KEY,
     api_secret=BYBIT_API_SECRET
 )
+
 my_persistence = PicklePersistence(filepath='my_file')
 # Create the Application and pass it your bot's token.
 tg_app = Application.builder().token(
@@ -211,7 +212,7 @@ def main() -> None:
     tg_app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    ws.order_stream(handle_orders)
+    ws_usdt_perpetual.order_stream(handle_orders)
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
