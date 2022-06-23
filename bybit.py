@@ -183,8 +183,8 @@ async def handle_execution(message):
 
 
 @sync
-async def handle_orders(message):
-    logger.info("Order Received!")
+async def pybit_handle_message(message):
+    logger.info("Update Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
     for chat_id in chat_ids:
         await tg_app.bot.send_message(
@@ -230,8 +230,9 @@ def main() -> None:
     tg_app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    ws_usdt_perpetual.order_stream(handle_orders)
-    ws_spot.execution_report_stream(handle_execution)
+    ws_usdt_perpetual.order_stream(pybit_handle_message)
+    ws_spot.execution_report_stream(pybit_handle_message)
+    ws_usdt_perpetual.execution_stream(pybit_handle_message)
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
