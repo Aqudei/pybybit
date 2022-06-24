@@ -237,15 +237,15 @@ def main() -> None:
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
     ws_usdt_perpetual.order_stream(
-        lambda message:  asyncio.run(pybit_handle_message(message)))
+        lambda message:  tg_app.create_task(pybit_handle_message(message)))
     ws_usdt_perpetual.execution_stream(
-        lambda message: asyncio.run(pybit_handle_message(message)))
+        lambda message: tg_app.create_task(pybit_handle_message(message)))
     ws_usdc_perpetual.execution_stream(
-        lambda message: asyncio.run(pybit_handle_message(message)))
+        lambda message: tg_app.create_task(pybit_handle_message(message)))
     ws_usdc_perpetual.order_stream(
-        lambda message: asyncio.run(pybit_handle_message(message)))
+        lambda message: tg_app.create_task(pybit_handle_message(message)))
     ws_spot.execution_report_stream(
-        lambda message: asyncio.run(pybit_handle_message(message)))
+        lambda message: tg_app.create_task(pybit_handle_message(message)))
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
