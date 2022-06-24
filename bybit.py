@@ -241,7 +241,6 @@ def main() -> None:
     ws_usdc_perpetual.position_stream(pybit_handle_message)
     ws_usdc_perpetual.execution_stream(pybit_handle_message)
     ws_usdc_perpetual.order_stream(pybit_handle_message)
-    ws_usdc_perpetual.trade_stream(pybit_handle_message)
     ws_spot.execution_report_stream(pybit_handle_message)
 
     # Run the bot until the user presses Ctrl-C
