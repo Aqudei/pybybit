@@ -202,7 +202,7 @@ def pybit_handle_message(message):
     for chat_id in chat_ids:
         logger.info(f"Sending message to Chat Id: {chat_id}")
         loop.run_until_complete(tg_app.bot.send_message(
-            chat_id=chat_id, text=json.dumps(message)))
+            chat_id=chat_id, text=json.dumps(message, indent=2)))
 
     loop.close()
 
