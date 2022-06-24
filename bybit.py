@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 
 BYBIT_API_KEY = os.environ.get("BYBIT_API_KEY")
 BYBIT_API_SECRET = os.environ.get("BYBIT_API_SECRET")
@@ -188,13 +188,13 @@ async def handle_execution(message):
             chat_id=chat_id, text=json.dumps(message))
 
 
-async def pybit_handle_message(message):
+def pybit_handle_message(message):
     logger.info("Update Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
     for chat_id in chat_ids:
         logger.info(f"Sending message to Chat Id: {chat_id}")
-        await tg_app.bot.send_message(
-            chat_id=chat_id, text=json.dumps(message))
+        loop.run_until_complete(tg_app.bot.send_message(
+            chat_id=chat_id, text=json.dumps(message)))
 
 
 async def send_test(update, context):
@@ -236,16 +236,11 @@ def main() -> None:
     tg_app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    ws_usdt_perpetual.order_stream(
-        lambda message:  tg_app.create_task(pybit_handle_message(message)))
-    ws_usdt_perpetual.execution_stream(
-        lambda message: tg_app.create_task(pybit_handle_message(message)))
-    ws_usdc_perpetual.execution_stream(
-        lambda message: tg_app.create_task(pybit_handle_message(message)))
-    ws_usdc_perpetual.order_stream(
-        lambda message: tg_app.create_task(pybit_handle_message(message)))
-    ws_spot.execution_report_stream(
-        lambda message: tg_app.create_task(pybit_handle_message(message)))
+    ws_usdt_perpetual.order_stream(pybit_handle_message)
+    ws_usdt_perpetual.execution_stream(pybit_handle_message)
+    ws_usdc_perpetual.execution_stream(pybit_handle_message)
+    ws_usdc_perpetual.order_stream(pybit_handle_message)
+    ws_spot.execution_report_stream(pybit_handle_message)
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
