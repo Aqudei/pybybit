@@ -2,7 +2,7 @@ import json
 import os
 from queue import PriorityQueue
 import time
-from pybit import inverse_perpetual, spot, usdt_perpetual, usdc_perpetual
+from pybit import inverse_perpetual, spot, usdt_perpetual, usdc_perpetual, usdc_options
 from dotenv import load_dotenv
 import logging
 from typing import Optional, Tuple
@@ -61,6 +61,12 @@ ws_spot = spot.WebSocket(
 )
 
 ws_usdc_perpetual = usdc_perpetual.WebSocket(
+    test=False,
+    api_key=BYBIT_API_KEY,
+    api_secret=BYBIT_API_SECRET
+)
+
+ws_usdc_options = usdc_options.WebSocket(
     test=False,
     api_key=BYBIT_API_KEY,
     api_secret=BYBIT_API_SECRET
@@ -238,13 +244,20 @@ def main() -> None:
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
     logger.info(session_auth.api_key_info())
+
     ws_usdt_perpetual.order_stream(pybit_handle_message)
     ws_usdt_perpetual.execution_stream(pybit_handle_message)
+    ws_usdt_perpetual.position_stream(pybit_handle_message)
+
     ws_usdc_perpetual.position_stream(pybit_handle_message)
     ws_usdc_perpetual.execution_stream(pybit_handle_message)
     ws_usdc_perpetual.order_stream(pybit_handle_message)
+
     ws_spot.execution_report_stream(pybit_handle_message)
 
+    ws_usdc_options.order_stream(pybit_handle_message)
+    ws_usdc_options.position_stream(pybit_handle_message)
+    ws_usdc_options.execution_stream(pybit_handle_message)
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
     # To reset this, simply pass `allowed_updates=[]`
