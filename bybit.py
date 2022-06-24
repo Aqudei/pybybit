@@ -237,6 +237,7 @@ def main() -> None:
     tg_app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
+    logger.info(session_auth.api_key_info())
     ws_usdt_perpetual.order_stream(pybit_handle_message)
     ws_usdt_perpetual.execution_stream(pybit_handle_message)
     ws_usdc_perpetual.position_stream(pybit_handle_message)
