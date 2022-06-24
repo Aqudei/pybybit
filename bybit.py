@@ -37,7 +37,6 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-loop = asyncio.new_event_loop()
 
 BYBIT_API_KEY = os.environ.get("BYBIT_API_KEY")
 BYBIT_API_SECRET = os.environ.get("BYBIT_API_SECRET")
@@ -195,6 +194,8 @@ async def handle_execution(message):
 
 
 def pybit_handle_message(message):
+    loop = asyncio.new_event_loop()
+
     logger.info("Update Received!")
     logger.info(message)
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
@@ -202,6 +203,8 @@ def pybit_handle_message(message):
         logger.info(f"Sending message to Chat Id: {chat_id}")
         loop.run_until_complete(tg_app.bot.send_message(
             chat_id=chat_id, text=json.dumps(message)))
+
+    loop.close()
 
 
 async def send_test(update, context):
