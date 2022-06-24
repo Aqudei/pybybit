@@ -192,6 +192,7 @@ async def pybit_handle_message(message):
     logger.info("Update Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
     for chat_id in chat_ids:
+        logger.info(f"Sending message to Chat Id: {chat_id}")
         await tg_app.bot.send_message(
             chat_id=chat_id, text=json.dumps(message))
 
