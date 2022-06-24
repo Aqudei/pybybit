@@ -2,7 +2,7 @@ import json
 import os
 from queue import PriorityQueue
 import time
-from pybit import inverse_perpetual, spot, usdt_perpetual
+from pybit import inverse_perpetual, spot, usdt_perpetual, usdc_perpetual
 from dotenv import load_dotenv
 import logging
 from typing import Optional, Tuple
@@ -55,6 +55,12 @@ ws_usdt_perpetual = usdt_perpetual.WebSocket(
 )
 
 ws_spot = spot.WebSocket(
+    test=False,
+    api_key=BYBIT_API_KEY,
+    api_secret=BYBIT_API_SECRET
+)
+
+ws_usdc_perpetual = usdc_perpetual.WebSocket(
     test=False,
     api_key=BYBIT_API_KEY,
     api_secret=BYBIT_API_SECRET
@@ -230,9 +236,12 @@ def main() -> None:
     tg_app.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    ws_usdt_perpetual.order_stream(pybit_handle_message)
-    ws_spot.execution_report_stream(pybit_handle_message)
-    ws_usdt_perpetual.execution_stream(pybit_handle_message)
+    ws_usdt_perpetual.order_stream(
+        lambda message:  pybit_handle_message(message))
+    ws_spot.execution_report_stream(
+        lambda message:  pybit_handle_message(message))
+    ws_usdt_perpetual.execution_stream(
+        lambda message:  pybit_handle_message(message))
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
