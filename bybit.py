@@ -188,7 +188,6 @@ async def handle_execution(message):
             chat_id=chat_id, text=json.dumps(message))
 
 
-@sync
 async def pybit_handle_message(message):
     logger.info("Update Received!")
     chat_ids = tg_app.bot_data.setdefault("channel_ids", set())
@@ -237,11 +236,11 @@ def main() -> None:
         filters.TEXT & ~filters.COMMAND, handle_messages))
 
     ws_usdt_perpetual.order_stream(
-        lambda message:  pybit_handle_message(message))
+        lambda message:  loop.run_until_complete(pybit_handle_message(message)))
     ws_spot.execution_report_stream(
-        lambda message:  pybit_handle_message(message))
+        lambda message: loop.run_until_complete(pybit_handle_message(message)))
     ws_usdt_perpetual.execution_stream(
-        lambda message:  pybit_handle_message(message))
+        lambda message: loop.run_until_complete(pybit_handle_message(message)))
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
