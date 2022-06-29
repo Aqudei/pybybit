@@ -80,7 +80,6 @@ ws_usdc_options = usdc_options.WebSocket(
 )
 
 
-
 my_persistence = PicklePersistence(filepath='my_file')
 # Create the Application and pass it your bot's token.
 tg_app = Application.builder().token(
@@ -259,29 +258,29 @@ def main() -> None:
 
     logger.info(session_auth.api_key_info())
 
-    ws_usdt_perpetual.order_stream(
-        "usdt_perpetual", "order_stream", pybit_handle_message)
-    ws_usdt_perpetual.execution_stream(
-        "usdt_perpetual", "execution_stream", pybit_handle_message)
-    ws_usdt_perpetual.position_stream(
-        "usdt_perpetual", "position_stream", pybit_handle_message)
+    ws_usdt_perpetual.order_stream(lambda message: pybit_handle_message(
+        "usdt_perpetual", "order_stream", message))
+    ws_usdt_perpetual.execution_stream(lambda message: pybit_handle_message(
+        "usdt_perpetual", "execution_stream", message))
+    ws_usdt_perpetual.position_stream(lambda message: pybit_handle_message(
+        "usdt_perpetual", "position_stream", message))
 
-    ws_usdc_perpetual.position_stream(
-        "usdc_perpetual", "position_stream", pybit_handle_message)
-    ws_usdc_perpetual.execution_stream(
-        "usdc_perpetual", "position_stream", pybit_handle_message)
-    ws_usdc_perpetual.order_stream(
-        "usdc_perpetual", "position_stream", pybit_handle_message)
+    ws_usdc_perpetual.position_stream(lambda message: pybit_handle_message(
+        "usdc_perpetual", "position_stream", message))
+    ws_usdc_perpetual.execution_stream(lambda message: pybit_handle_message(
+        "usdc_perpetual", "execution_stream", message))
+    ws_usdc_perpetual.order_stream(lambda message: pybit_handle_message(
+        "usdc_perpetual", "order_stream", message))
 
-    ws_spot.execution_report_stream(
-        "spot", "execution_report_stream", pybit_handle_message)
+    ws_spot.execution_report_stream(lambda message: pybit_handle_message(
+        "spot", "execution_report_stream", message))
 
-    ws_usdc_options.order_stream(
-        "usdc_option", "order_stream", pybit_handle_message)
-    ws_usdc_options.position_stream(
-        "usdc_option", "position_stream", pybit_handle_message)
-    ws_usdc_options.execution_stream(
-        "usdc_option", "execution_stream", pybit_handle_message)\
+    ws_usdc_options.order_stream(lambda message: pybit_handle_message(
+        "usdc_options", "order_stream", message))
+    ws_usdc_options.position_stream(lambda message: pybit_handle_message(
+        "usdc_options", "position_stream", message))
+    ws_usdc_options.execution_stream(lambda message: pybit_handle_message(
+        "usdc_options", "execution_stream", message))
 
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
