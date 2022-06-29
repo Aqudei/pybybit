@@ -2,7 +2,14 @@ import json
 import os
 from queue import PriorityQueue
 import time
-from pybit import inverse_perpetual, spot, usdt_perpetual, usdc_perpetual, usdc_options
+from pybit import (spot,
+                   inverse_perpetual,
+                   usdt_perpetual,
+                   usdc_perpetual,
+                   usdc_options,
+                   inverse_futures
+                   )
+
 from dotenv import load_dotenv
 import logging
 from typing import Optional, Tuple
@@ -67,6 +74,12 @@ ws_usdc_perpetual = usdc_perpetual.WebSocket(
 )
 
 ws_usdc_options = usdc_options.WebSocket(
+    test=False,
+    api_key=BYBIT_API_KEY,
+    api_secret=BYBIT_API_SECRET
+)
+
+ws_inverse_futures = inverse_futures.WebSocket(
     test=False,
     api_key=BYBIT_API_KEY,
     api_secret=BYBIT_API_SECRET
@@ -194,7 +207,7 @@ async def handle_execution(message):
             chat_id=chat_id, text=json.dumps(message))
 
 
-def pybit_handle_message(message):
+def pybit_handle_message(market, action, message):
 
     logger.info("Update Received!")
     logger.info(message)
@@ -206,7 +219,7 @@ def pybit_handle_message(message):
     for chat_id in chat_ids:
         logger.info(f"Sending message to Chat Id: {chat_id}")
         loop.run_until_complete(tg_app.bot.send_message(
-            chat_id=chat_id, text=json.dumps(message, indent=2)))
+            chat_id=chat_id, text="{}::{}\n{}".format(market, action, json.dumps(message, indent=2))))
 
 
 async def send_test(update, context):
@@ -250,19 +263,37 @@ def main() -> None:
 
     logger.info(session_auth.api_key_info())
 
-    ws_usdt_perpetual.order_stream(pybit_handle_message)
-    ws_usdt_perpetual.execution_stream(pybit_handle_message)
-    ws_usdt_perpetual.position_stream(pybit_handle_message)
+    ws_usdt_perpetual.order_stream(
+        "usdt_perpetual", "order_stream", pybit_handle_message)
+    ws_usdt_perpetual.execution_stream(
+        "usdt_perpetual", "execution_stream", pybit_handle_message)
+    ws_usdt_perpetual.position_stream(
+        "usdt_perpetual", "position_stream", pybit_handle_message)
 
-    ws_usdc_perpetual.position_stream(pybit_handle_message)
-    ws_usdc_perpetual.execution_stream(pybit_handle_message)
-    ws_usdc_perpetual.order_stream(pybit_handle_message)
+    ws_usdc_perpetual.position_stream(
+        "usdc_perpetual", "position_stream", pybit_handle_message)
+    ws_usdc_perpetual.execution_stream(
+        "usdc_perpetual", "position_stream", pybit_handle_message)
+    ws_usdc_perpetual.order_stream(
+        "usdc_perpetual", "position_stream", pybit_handle_message)
 
-    ws_spot.execution_report_stream(pybit_handle_message)
+    ws_spot.execution_report_stream(
+        "spot", "execution_report_stream", pybit_handle_message)
 
-    ws_usdc_options.order_stream(pybit_handle_message)
-    ws_usdc_options.position_stream(pybit_handle_message)
-    ws_usdc_options.execution_stream(pybit_handle_message)
+    ws_usdc_options.order_stream(
+        "usdc_option", "order_stream", pybit_handle_message)
+    ws_usdc_options.position_stream(
+        "usdc_option", "position_stream", pybit_handle_message)
+    ws_usdc_options.execution_stream(
+        "usdc_option", "execution_stream", pybit_handle_message)\
+
+    ws_inverse_futures.order_stream(
+        "inverse_futures", "order_stream", pybit_handle_message)
+    ws_inverse_futures.position_stream(
+        "inverse_futures", "position_stream", pybit_handle_message)
+    ws_inverse_futures.execution_stream(
+        "inverse_futures", "execution_stream", pybit_handle_message)
+
     # Run the bot until the user presses Ctrl-C
     # We pass 'allowed_updates' handle *all* updates including `chat_member` updates
     # To reset this, simply pass `allowed_updates=[]`
